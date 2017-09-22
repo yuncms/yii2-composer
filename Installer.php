@@ -23,6 +23,7 @@ class Installer extends LibraryInstaller
     const EXTRA_FIELD = 'yuncms';
     const TRANSLATE_FILE = 'yuncms/i18n.php';
     const MIGRATION_FILE = 'yuncms/migrations.php';
+
     const MODULE_FILE = 'yuncms/modules.php';
     const BACKEND_MODULE_FILE = 'yuncms/modules.php';
 
@@ -284,12 +285,9 @@ class Installer extends LibraryInstaller
     protected function addTranslate(PackageInterface $package)
     {
         $extra = $package->getExtra();
-        if (isset($extra[self::EXTRA_FIELD])) {
-            $extra = $extra[self::EXTRA_FIELD];
-            $moduleName = $extra['name'];
-            $translate = $extra['i18n'];
+        if (isset($extra[self::EXTRA_FIELD]['name']) && isset($extra[self::EXTRA_FIELD]['i18n'])) {
             $translates = $this->loadTranslates();
-            $translates[$moduleName] = $translate;
+            $translates[$extra[self::EXTRA_FIELD]['name']] = $extra[self::EXTRA_FIELD]['i18n'];
             $this->saveTranslates($translates);
         }
     }
@@ -302,9 +300,8 @@ class Installer extends LibraryInstaller
     {
         $translates = $this->loadTranslates();
         $extra = $package->getExtra();
-        if (isset($extra[self::EXTRA_FIELD])) {
-            $extra = $extra[self::EXTRA_FIELD];
-            unset($translates[$extra['name']]);
+        if (isset($extra[self::EXTRA_FIELD]['name'])) {
+            unset($translates[$extra[self::EXTRA_FIELD]['name']]);
             $this->saveTranslates($translates);
         }
     }
