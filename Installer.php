@@ -40,7 +40,7 @@ class Installer extends LibraryInstaller
         // install the package the normal composer way
         parent::install($repo, $package);
         // add the package to yuncms/modules.php
-        $this->addModule($package);
+        //$this->addModule($package);
         $this->addTranslate($package);
     }
 
@@ -50,9 +50,9 @@ class Installer extends LibraryInstaller
     public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target)
     {
         parent::update($repo, $initial, $target);
-        $this->removeModule($initial);
+        //$this->removeModule($initial);
         $this->removeTranslate($initial);
-        $this->addModule($target);
+        //$this->addModule($target);
         $this->addTranslate($target);
     }
 
@@ -64,7 +64,7 @@ class Installer extends LibraryInstaller
         // uninstall the package the normal composer way
         parent::uninstall($repo, $package);
         // remove the package from yuncms/modules.php
-        $this->removeModule($package);
+        //$this->removeModule($package);
         // remove the package from yuncms/i18n.php
         $this->removeTranslate($package);
     }
@@ -261,134 +261,6 @@ class Installer extends LibraryInstaller
         // invalidate opcache of extensions.php if exists
         if (function_exists('opcache_invalidate')) {
             opcache_invalidate($file, true);
-        }
-    }
-
-    /**
-     * Special method to run tasks defined in `[extra][yii\composer\Installer::postCreateProject]` key in `composer.json`
-     *
-     * @param Event $event
-     */
-    public static function postCreateProject($event)
-    {
-        static::runCommands($event, __METHOD__);
-    }
-
-    /**
-     * Special method to run tasks defined in `[extra][yii\composer\Installer::postInstall]` key in `composer.json`
-     *
-     * @param Event $event
-     * @since 2.0.5
-     */
-    public static function postInstall($event)
-    {
-        static::runCommands($event, __METHOD__);
-    }
-
-    /**
-     * Special method to run tasks defined in `[extra][$extraKey]` key in `composer.json`
-     *
-     * @param Event $event
-     * @param string $extraKey
-     * @since 2.0.5
-     */
-    protected static function runCommands($event, $extraKey)
-    {
-        $params = $event->getComposer()->getPackage()->getExtra();
-        if (isset($params[$extraKey]) && is_array($params[$extraKey])) {
-            foreach ($params[$extraKey] as $method => $args) {
-                call_user_func_array([__CLASS__, $method], (array)$args);
-            }
-        }
-    }
-
-    /**
-     * Sets the correct permission for the files and directories listed in the extra section.
-     * @param array $paths the paths (keys) and the corresponding permission octal strings (values)
-     */
-    public static function setPermission(array $paths)
-    {
-        foreach ($paths as $path => $permission) {
-            echo "chmod('$path', $permission)...";
-            if (is_dir($path) || is_file($path)) {
-                try {
-                    if (chmod($path, octdec($permission))) {
-                        echo "done.\n";
-                    };
-                } catch (\Exception $e) {
-                    echo $e->getMessage() . "\n";
-                }
-            } else {
-                echo "file not found.\n";
-            }
-        }
-    }
-
-    /**
-     * Generates a cookie validation key for every app config listed in "config" in extra section.
-     * You can provide one or multiple parameters as the configuration files which need to have validation key inserted.
-     */
-    public static function generateCookieValidationKey()
-    {
-        $configs = func_get_args();
-        $key = self::generateRandomString();
-        foreach ($configs as $config) {
-            if (is_file($config)) {
-                $content = preg_replace('/(("|\')cookieValidationKey("|\')\s*=>\s*)(""|\'\')/', "\\1'$key'", file_get_contents($config), -1, $count);
-                if ($count > 0) {
-                    file_put_contents($config, $content);
-                }
-            }
-        }
-    }
-
-    protected static function generateRandomString()
-    {
-        if (!extension_loaded('openssl')) {
-            throw new \Exception('The OpenSSL PHP extension is required by Yii2.');
-        }
-        $length = 32;
-        $bytes = openssl_random_pseudo_bytes($length);
-        return strtr(substr(base64_encode($bytes), 0, $length), '+/=', '_-.');
-    }
-
-    /**
-     * Copy files to specified locations.
-     * @param array $paths The source files paths (keys) and the corresponding target locations
-     * for copied files (values). Location can be specified as an array - first element is target
-     * location, second defines whether file can be overwritten (by default method don't overwrite
-     * existing files).
-     * @since 2.0.5
-     */
-    public static function copyFiles(array $paths)
-    {
-        foreach ($paths as $source => $target) {
-            // handle file target as array [path, overwrite]
-            $target = (array)$target;
-            echo "Copying file $source to $target[0] - ";
-
-            if (!is_file($source)) {
-                echo "source file not found.\n";
-                continue;
-            }
-
-            if (is_file($target[0]) && empty($target[1])) {
-                echo "target file exists - skip.\n";
-                continue;
-            } elseif (is_file($target[0]) && !empty($target[1])) {
-                echo "target file exists - overwrite - ";
-            }
-
-            try {
-                if (!is_dir(dirname($target[0]))) {
-                    mkdir(dirname($target[0]), 0777, true);
-                }
-                if (copy($source, $target[0])) {
-                    echo "done.\n";
-                }
-            } catch (\Exception $e) {
-                echo $e->getMessage() . "\n";
-            }
         }
     }
 }
