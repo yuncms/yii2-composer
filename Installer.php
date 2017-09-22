@@ -22,6 +22,8 @@ class Installer extends LibraryInstaller
 {
     const EXTRA_BOOTSTRAP = 'bootstrap';
     const EXTRA_FIELD = 'yuncms';
+
+    const TRANSLATE_FILE = 'yuncms/i18n.php';
     const MODULE_FILE = 'yuncms/modules.php';
 
     /**
@@ -41,6 +43,7 @@ class Installer extends LibraryInstaller
         parent::install($repo, $package);
         // add the package to yuncms/modules.php
         $this->addModule($package);
+        $this->addTranslate($package);
     }
 
     /**
@@ -50,7 +53,9 @@ class Installer extends LibraryInstaller
     {
         parent::update($repo, $initial, $target);
         $this->removeModule($initial);
+        $this->removeTranslate($initial);
         $this->addModule($target);
+        $this->addTranslate($target);
     }
 
     /**
@@ -62,6 +67,9 @@ class Installer extends LibraryInstaller
         parent::uninstall($repo, $package);
         // remove the package from yuncms/modules.php
         $this->removeModule($package);
+
+        // remove the package from yuncms/i18n.php
+        $this->removeTranslate($package);
     }
 
     protected function addModule(PackageInterface $package)
@@ -198,11 +206,54 @@ class Installer extends LibraryInstaller
         }
     }
 
+    protected function addTranslate(PackageInterface $package)
+    {
+        $packages = $this->loadModules();
+        unset($packages[$package->getName()]);
+        $this->saveExtensions($packages);
+    }
+
+    protected function removeTranslate(PackageInterface $package)
+    {
+        $packages = $this->loadModules();
+        unset($packages[$package->getName()]);
+        $this->saveExtensions($packages);
+    }
+
+    protected function loadTranslates()
+    {
+        $file = $this->vendorDir . '/' . static::MODULE_FILE;
+        if (!is_file($file)) {
+            return [];
+        }
+        // invalidate opcache of extensions.php if exists
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($file, true);
+        }
+        $extensions = require($file);
+
+        $vendorDir = str_replace('\\', '/', $this->vendorDir);
+        $n = strlen($vendorDir);
+
+        foreach ($extensions as &$extension) {
+            if (isset($extension['alias'])) {
+                foreach ($extension['alias'] as $alias => $path) {
+                    $path = str_replace('\\', '/', $path);
+                    if (strpos($path . '/', $vendorDir . '/') === 0) {
+                        $extension['alias'][$alias] = '<vendor-dir>' . substr($path, $n);
+                    }
+                }
+            }
+        }
+
+        return $extensions;
+    }
+
     /**
      * 保存翻译
      * @param array $translates
      */
-    protected function saveTranslate(array $translates)
+    protected function saveTranslates(array $translates)
     {
         $file = $this->vendorDir . '/' . static::TRANSLATE_FILE;
         if (!file_exists(dirname($file))) {
