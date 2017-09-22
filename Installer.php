@@ -20,7 +20,6 @@ use Composer\Util\Filesystem;
  */
 class Installer extends LibraryInstaller
 {
-    const EXTRA_BOOTSTRAP = 'bootstrap';
     const EXTRA_FIELD = 'yuncms';
     const MODULE_FILE = 'yuncms/modules.php';
 
@@ -71,28 +70,21 @@ class Installer extends LibraryInstaller
             'version' => $package->getVersion(),
         ];
 
-        $alias = $this->generateDefaultAlias($package);
-        if (!empty($alias)) {
-            $module['alias'] = $alias;
-        }
         $extra = $package->getExtra();
-        if (isset($extra[self::EXTRA_BOOTSTRAP])) {
-            $module['bootstrap'] = $extra[self::EXTRA_BOOTSTRAP];
-        }
 
         if (isset($extra[self::EXTRA_FIELD])) {
-            $m = $extra[self::EXTRA_FIELD];
+            $module['config'] = $extra[self::EXTRA_FIELD];
             //生成语言包配置
-            if (isset($m['backend'])) {//处理后端模块
+            if (isset($module['config']['backend'])) {//处理后端模块
 
             }
-            if (isset($m['frontend'])) {//处理 前端模块
+            if (isset($module['config']['frontend'])) {//处理 前端模块
 
             }
-            if (isset($m['i18n'])) {//处理语言包
+            if (isset($module['config']['i18n'])) {//处理语言包
 
             }
-            if (isset($m['migration'])) {//处理迁移
+            if (isset($module['config']['migration'])) {//处理迁移
 
             }
         }
