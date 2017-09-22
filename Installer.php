@@ -43,7 +43,7 @@ class Installer extends LibraryInstaller
         // install the package the normal composer way
         parent::install($repo, $package);
         // add the package to yuncms/modules.php
-        //$this->addModule($package);
+        $this->addModule($package);
         $this->addTranslate($package);
         $this->addMigration($package);
     }
@@ -54,10 +54,10 @@ class Installer extends LibraryInstaller
     public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target)
     {
         parent::update($repo, $initial, $target);
-        //$this->removeModule($initial);
+        $this->removeModule($initial);
         $this->removeTranslate($initial);
         $this->removeMigration($initial);
-        //$this->addModule($target);
+        $this->addModule($target);
         $this->addTranslate($target);
         $this->addMigration($target);
     }
@@ -70,7 +70,7 @@ class Installer extends LibraryInstaller
         // uninstall the package the normal composer way
         parent::uninstall($repo, $package);
         // remove the package from yuncms/modules.php
-        //$this->removeModule($package);
+        $this->removeModule($package);
 
         // remove the package from yuncms/i18n.php
         $this->removeTranslate($package);
