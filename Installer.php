@@ -21,7 +21,6 @@ use Composer\Util\Filesystem;
 class Installer extends LibraryInstaller
 {
     const EXTRA_FIELD = 'yuncms';
-
     const TRANSLATE_FILE = 'yuncms/i18n.php';
     const MODULE_FILE = 'yuncms/modules.php';
 
@@ -66,7 +65,6 @@ class Installer extends LibraryInstaller
         parent::uninstall($repo, $package);
         // remove the package from yuncms/modules.php
         $this->removeModule($package);
-
         // remove the package from yuncms/i18n.php
         $this->removeTranslate($package);
     }
@@ -200,14 +198,26 @@ class Installer extends LibraryInstaller
 
     protected function addTranslate(PackageInterface $package)
     {
-        $packages = $this->loadModules();
-        unset($packages[$package->getName()]);
-        $this->saveExtensions($packages);
+        $extra = $package->getExtra();
+        if (isset($extra[self::EXTRA_FIELD])) {
+            $extra = $extra[self::EXTRA_FIELD];
+            $moduleName = $extra['name'];
+            $translate = [
+                'class' => 'yii\i18n\PhpMessageSource',
+            ];
+            $translate['basePath'] = '@yuncms/' . $moduleName . '/' . $extra['i18n'];
+
+            $translates = $this->loadTranslates();
+            $translates[$moduleName] = $translate;
+            $this->saveTranslates($translates);
+        }
+
+
     }
 
     protected function removeTranslate(PackageInterface $package)
     {
-        $packages = $this->loadModules();
+        $packages = $this->loadTranslates();
         unset($packages[$package->getName()]);
         $this->saveExtensions($packages);
     }
