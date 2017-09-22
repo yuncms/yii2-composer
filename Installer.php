@@ -48,7 +48,7 @@ class Installer extends LibraryInstaller
     public function update(InstalledRepositoryInterface $repo, PackageInterface $initial, PackageInterface $target)
     {
         parent::update($repo, $initial, $target);
-        $this->removePackage($initial);
+        $this->removeModule($initial);
         $this->addModule($target);
     }
 
