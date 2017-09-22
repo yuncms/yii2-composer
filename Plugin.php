@@ -37,5 +37,17 @@ class Plugin implements PluginInterface
             @mkdir(dirname($file), 0777, true);
             file_put_contents($file, "<?php\n\nreturn [];\n");
         }
+
+        $file = $this->_vendorDir . Installer::MIGRATION_FILE;
+        if (!is_file($file)) {
+            @mkdir(dirname($file), 0777, true);
+            file_put_contents($file, "<?php\n\nreturn [];\n");
+        }
+
+        $file = $this->_vendorDir . Installer::TRANSLATE_FILE;
+        if (!is_file($file)) {
+            @mkdir(dirname($file), 0777, true);
+            file_put_contents($file, "<?php\n\nreturn [];\n");
+        }
     }
 }
