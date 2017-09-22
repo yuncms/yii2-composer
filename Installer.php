@@ -25,7 +25,7 @@ class Installer extends LibraryInstaller
     const MIGRATION_FILE = 'yuncms/migrations.php';
 
     const MODULE_FILE = 'yuncms/modules.php';
-    const BACKEND_MODULE_FILE = 'yuncms/modules.php';
+    const BACKEND_MODULE_FILE = 'yuncms/backend-modules.php';
 
     /**
      * @inheritdoc
