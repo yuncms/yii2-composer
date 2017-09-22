@@ -199,6 +199,24 @@ class Installer extends LibraryInstaller
     }
 
     /**
+     * 保存翻译
+     * @param array $translates
+     */
+    protected function saveTranslate(array $translates)
+    {
+        $file = $this->vendorDir . '/' . static::TRANSLATE_FILE;
+        if (!file_exists(dirname($file))) {
+            mkdir(dirname($file), 0777, true);
+        }
+        $array = str_replace("'<vendor-dir>", '$vendorDir . \'', var_export($translates, true));
+        file_put_contents($file, "<?php\n\n\$vendorDir = dirname(__DIR__);\n\nreturn $array;\n");
+        // invalidate opcache of extensions.php if exists
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($file, true);
+        }
+    }
+
+    /**
      * Special method to run tasks defined in `[extra][yii\composer\Installer::postCreateProject]` key in `composer.json`
      *
      * @param Event $event
