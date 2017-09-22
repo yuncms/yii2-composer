@@ -283,8 +283,6 @@ class Installer extends LibraryInstaller
                 $migrations[] = $extra['migrationNamespace'];
                 $this->saveMigrations($migrations);
             }
-
-
         }
     }
 
@@ -309,7 +307,7 @@ class Installer extends LibraryInstaller
      */
     protected function loadMigrations()
     {
-        $file = $this->vendorDir . '/' . static::TRANSLATE_FILE;
+        $file = $this->vendorDir . '/' . static::MIGRATION_FILE;
         if (!is_file($file)) {
             return [];
         }
@@ -322,15 +320,15 @@ class Installer extends LibraryInstaller
 
     /**
      * 保存迁移
-     * @param array $translates
+     * @param array $migrations
      */
-    protected function saveMigrations(array $translates)
+    protected function saveMigrations(array $migrations)
     {
         $file = $this->vendorDir . '/' . static::TRANSLATE_FILE;
         if (!file_exists(dirname($file))) {
             mkdir(dirname($file), 0777, true);
         }
-        $array = var_export($translates, true);
+        $array = var_export($migrations, true);
         file_put_contents($file, "<?php\n\n\$vendorDir = dirname(__DIR__);\n\nreturn $array;\n");
         // invalidate opcache of extensions.php if exists
         if (function_exists('opcache_invalidate')) {
