@@ -22,7 +22,7 @@ class Installer extends LibraryInstaller
 {
     const EXTRA_FIELD = 'yuncms';
     const TRANSLATE_FILE = 'yuncms/i18n.php';
-    const FRONTEND_MODULE_FILE = 'yuncms/modules.php';
+    const MODULE_FILE = 'yuncms/modules.php';
     const BACKEND_MODULE_FILE = 'yuncms/modules.php';
 
     /**
@@ -183,6 +183,10 @@ class Installer extends LibraryInstaller
         return $extensions;
     }
 
+    /**
+     * 保存模块
+     * @param array $extensions
+     */
     protected function saveModules(array $extensions)
     {
         $file = $this->vendorDir . '/' . static::MODULE_FILE;
