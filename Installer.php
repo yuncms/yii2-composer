@@ -246,7 +246,7 @@ class Installer extends LibraryInstaller
      */
     protected function saveMigrations(array $migrations)
     {
-        $file = $this->vendorDir . '/' . static::TRANSLATE_FILE;
+        $file = $this->vendorDir . '/' . static::MIGRATION_FILE;
         if (!file_exists(dirname($file))) {
             mkdir(dirname($file), 0777, true);
         }
