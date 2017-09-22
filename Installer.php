@@ -250,11 +250,14 @@ class Installer extends LibraryInstaller
         if (!file_exists(dirname($file))) {
             mkdir(dirname($file), 0777, true);
         }
-        $string = '';
-        foreach ($migrations as $migration) {
-            $string .= "'" . $migration . "',\n";
-        }
-        file_put_contents($file, "<?php\n\nreturn [{$string}];\n");
+//        $string = '';
+//        foreach ($migrations as $migration) {
+//            $string .= "'" . $migration . "',\n";
+//        }
+//        file_put_contents($file, "<?php\n\nreturn [{$string}];\n");
+
+        $array = var_export($migrations, true);
+        file_put_contents($file, "<?php\n\nreturn $array;\n");
         // invalidate opcache of extensions.php if exists
         if (function_exists('opcache_invalidate')) {
             opcache_invalidate($file, true);
