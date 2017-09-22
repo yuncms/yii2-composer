@@ -22,7 +22,8 @@ class Installer extends LibraryInstaller
 {
     const EXTRA_FIELD = 'yuncms';
     const TRANSLATE_FILE = 'yuncms/i18n.php';
-    const MODULE_FILE = 'yuncms/modules.php';
+    const FRONTEND_MODULE_FILE = 'yuncms/modules.php';
+    const BACKEND_MODULE_FILE = 'yuncms/modules.php';
 
     /**
      * @inheritdoc
@@ -196,6 +197,10 @@ class Installer extends LibraryInstaller
         }
     }
 
+    /**
+     * 加载翻译
+     * @param PackageInterface $package
+     */
     protected function addTranslate(PackageInterface $package)
     {
         $extra = $package->getExtra();
@@ -203,20 +208,31 @@ class Installer extends LibraryInstaller
             $extra = $extra[self::EXTRA_FIELD];
             $moduleName = $extra['name'];
             $translate = $extra['i18n'];
-            
             $translates = $this->loadTranslates();
             $translates[$moduleName] = $translate;
             $this->saveTranslates($translates);
         }
     }
 
+    /**
+     * 删除翻译
+     * @param PackageInterface $package
+     */
     protected function removeTranslate(PackageInterface $package)
     {
-        $packages = $this->loadTranslates();
-        unset($packages[$package->getName()]);
-        $this->saveTranslates($packages);
+        $translates = $this->loadTranslates();
+        $extra = $package->getExtra();
+        if (isset($extra[self::EXTRA_FIELD])) {
+            $extra = $extra[self::EXTRA_FIELD];
+            unset($translates[$extra['name']]);
+            $this->saveTranslates($translates);
+        }
     }
 
+    /**
+     * 加载翻译
+     * @return array|mixed
+     */
     protected function loadTranslates()
     {
         $file = $this->vendorDir . '/' . static::TRANSLATE_FILE;
@@ -227,23 +243,7 @@ class Installer extends LibraryInstaller
         if (function_exists('opcache_invalidate')) {
             opcache_invalidate($file, true);
         }
-        $extensions = require($file);
-
-        $vendorDir = str_replace('\\', '/', $this->vendorDir);
-        $n = strlen($vendorDir);
-
-        foreach ($extensions as &$extension) {
-            if (isset($extension['alias'])) {
-                foreach ($extension['alias'] as $alias => $path) {
-                    $path = str_replace('\\', '/', $path);
-                    if (strpos($path . '/', $vendorDir . '/') === 0) {
-                        $extension['alias'][$alias] = '<vendor-dir>' . substr($path, $n);
-                    }
-                }
-            }
-        }
-
-        return $extensions;
+        return require($file);
     }
 
     /**
@@ -256,7 +256,7 @@ class Installer extends LibraryInstaller
         if (!file_exists(dirname($file))) {
             mkdir(dirname($file), 0777, true);
         }
-        $array = str_replace("'<vendor-dir>", '$vendorDir . \'', var_export($translates, true));
+        $array = var_export($translates, true);
         file_put_contents($file, "<?php\n\n\$vendorDir = dirname(__DIR__);\n\nreturn $array;\n");
         // invalidate opcache of extensions.php if exists
         if (function_exists('opcache_invalidate')) {
