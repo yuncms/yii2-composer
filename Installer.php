@@ -20,7 +20,7 @@ use Composer\Util\Filesystem;
 class Installer extends LibraryInstaller
 {
     const EXTRA_BOOTSTRAP = 'bootstrap';
-    const EXTENSION_FILE = 'yiisoft/extensions.php';
+    const EXTENSION_FILE = 'yuncms/modules.php';
 
 
     /**
