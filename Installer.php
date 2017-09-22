@@ -22,6 +22,7 @@ class Installer extends LibraryInstaller
 {
     const EXTRA_FIELD = 'yuncms';
     const TRANSLATE_FILE = 'yuncms/i18n.php';
+    const MIGRATION_FILE = 'yuncms/migrations.php';
     const MODULE_FILE = 'yuncms/modules.php';
     const BACKEND_MODULE_FILE = 'yuncms/modules.php';
 
@@ -255,6 +256,75 @@ class Installer extends LibraryInstaller
      * @param array $translates
      */
     protected function saveTranslates(array $translates)
+    {
+        $file = $this->vendorDir . '/' . static::TRANSLATE_FILE;
+        if (!file_exists(dirname($file))) {
+            mkdir(dirname($file), 0777, true);
+        }
+        $array = var_export($translates, true);
+        file_put_contents($file, "<?php\n\n\$vendorDir = dirname(__DIR__);\n\nreturn $array;\n");
+        // invalidate opcache of extensions.php if exists
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($file, true);
+        }
+    }
+
+    /**
+     * 加载迁移
+     * @param PackageInterface $package
+     */
+    protected function addMigration(PackageInterface $package)
+    {
+        $extra = $package->getExtra();
+        if (isset($extra[self::EXTRA_FIELD])) {
+            $extra = $extra[self::EXTRA_FIELD];
+            if (isset($extra['migrationNamespace'])) {
+                $migrations = $this->loadMigrations();
+                $migrations[] = $extra['migrationNamespace'];
+                $this->saveMigrations($migrations);
+            }
+
+
+        }
+    }
+
+    /**
+     * 删除迁移
+     * @param PackageInterface $package
+     */
+    protected function removeMigration(PackageInterface $package)
+    {
+        $translates = $this->loadTranslates();
+        $extra = $package->getExtra();
+        if (isset($extra[self::EXTRA_FIELD])) {
+            $extra = $extra[self::EXTRA_FIELD];
+            unset($translates[$extra['name']]);
+            $this->saveTranslates($translates);
+        }
+    }
+
+    /**
+     * 加载迁移
+     * @return array|mixed
+     */
+    protected function loadMigrations()
+    {
+        $file = $this->vendorDir . '/' . static::TRANSLATE_FILE;
+        if (!is_file($file)) {
+            return [];
+        }
+        // invalidate opcache of extensions.php if exists
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($file, true);
+        }
+        return require($file);
+    }
+
+    /**
+     * 保存迁移
+     * @param array $translates
+     */
+    protected function saveMigrations(array $translates)
     {
         $file = $this->vendorDir . '/' . static::TRANSLATE_FILE;
         if (!file_exists(dirname($file))) {
