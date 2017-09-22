@@ -79,90 +79,51 @@ class Installer extends LibraryInstaller
         $this->removeMigration($package);
     }
 
+    /**
+     * 安装模块
+     * @param PackageInterface $package
+     */
     protected function addModule(PackageInterface $package)
     {
-        $module = [
-            'name' => $package->getName(),
-            'version' => $package->getVersion(),
-        ];
-
         $extra = $package->getExtra();
-
-        if (isset($extra[self::EXTRA_FIELD])) {
-            $module['config'] = $extra[self::EXTRA_FIELD];
-            //生成语言包配置
-            if (isset($module['config']['backend'])) {//处理后端模块
-
+        if (isset($extra[self::EXTRA_FIELD]['name']) && isset($extra[self::EXTRA_FIELD]['frontend'])) {
+            $module = $extra[self::EXTRA_FIELD]['frontend'];
+            if (isset($module['class'])) {
+                $modules = $this->loadModules();
+                $modules[$extra[self::EXTRA_FIELD]['name']] = $module;
+                $this->saveModules($modules);
             }
-            if (isset($module['config']['frontend'])) {//处理 前端模块
 
-            }
-            if (isset($module['config']['i18n'])) {//处理语言包
-
-            }
-            if (isset($module['config']['migration'])) {//处理迁移
-
+            $backendModule = $extra[self::EXTRA_FIELD]['backend'];
+            if (isset($backendModule['class'])) {
+                $backendModules = $this->loadBackendModules();
+                $backendModules[$extra[self::EXTRA_FIELD]['name']] = $backendModule;
+                $this->saveBackendModules($backendModules);
             }
         }
-
-        $modules = $this->loadModules();
-        $modules[$package->getName()] = $module;
-        $this->saveModules($modules);
     }
 
-    protected function generateDefaultAlias(PackageInterface $package)
-    {
-        $fs = new Filesystem;
-        $vendorDir = $fs->normalizePath($this->vendorDir);
-        $autoload = $package->getAutoload();
-
-        $aliases = [];
-
-        if (!empty($autoload['psr-0'])) {
-            foreach ($autoload['psr-0'] as $name => $path) {
-                $name = str_replace('\\', '/', trim($name, '\\'));
-                if (!$fs->isAbsolutePath($path)) {
-                    $path = $this->vendorDir . '/' . $package->getPrettyName() . '/' . $path;
-                }
-                $path = $fs->normalizePath($path);
-                if (strpos($path . '/', $vendorDir . '/') === 0) {
-                    $aliases["@$name"] = '<vendor-dir>' . substr($path, strlen($vendorDir)) . '/' . $name;
-                } else {
-                    $aliases["@$name"] = $path . '/' . $name;
-                }
-            }
-        }
-
-        if (!empty($autoload['psr-4'])) {
-            foreach ($autoload['psr-4'] as $name => $path) {
-                if (is_array($path)) {
-                    // ignore psr-4 autoload specifications with multiple search paths
-                    // we can not convert them into aliases as they are ambiguous
-                    continue;
-                }
-                $name = str_replace('\\', '/', trim($name, '\\'));
-                if (!$fs->isAbsolutePath($path)) {
-                    $path = $this->vendorDir . '/' . $package->getPrettyName() . '/' . $path;
-                }
-                $path = $fs->normalizePath($path);
-                if (strpos($path . '/', $vendorDir . '/') === 0) {
-                    $aliases["@$name"] = '<vendor-dir>' . substr($path, strlen($vendorDir));
-                } else {
-                    $aliases["@$name"] = $path;
-                }
-            }
-        }
-
-        return $aliases;
-    }
-
+    /**
+     * 删除模块
+     * @param PackageInterface $package
+     */
     protected function removeModule(PackageInterface $package)
     {
-        $packages = $this->loadModules();
-        unset($packages[$package->getName()]);
-        $this->saveExtensions($packages);
+        $extra = $package->getExtra();
+        if (isset($extra[self::EXTRA_FIELD]['name'])) {
+            $modules = $this->loadModules();
+            unset($modules[$extra[self::EXTRA_FIELD]['name']]);
+            $this->saveModules($modules);
+            $backendModules = $this->loadBackendModules();
+            unset($backendModules[$extra[self::EXTRA_FIELD]['name']]);
+            $this->saveModules($backendModules);
+        }
     }
 
+    /**
+     * 加载模块
+     * @return array|mixed
+     */
     protected function loadModules()
     {
         $file = $this->vendorDir . '/' . static::MODULE_FILE;
@@ -173,37 +134,56 @@ class Installer extends LibraryInstaller
         if (function_exists('opcache_invalidate')) {
             opcache_invalidate($file, true);
         }
-        $extensions = require($file);
+        return require($file);
+    }
 
-        $vendorDir = str_replace('\\', '/', $this->vendorDir);
-        $n = strlen($vendorDir);
-
-        foreach ($extensions as &$extension) {
-            if (isset($extension['alias'])) {
-                foreach ($extension['alias'] as $alias => $path) {
-                    $path = str_replace('\\', '/', $path);
-                    if (strpos($path . '/', $vendorDir . '/') === 0) {
-                        $extension['alias'][$alias] = '<vendor-dir>' . substr($path, $n);
-                    }
-                }
-            }
+    /**
+     * 加载后端模块
+     * @return array|mixed
+     */
+    protected function loadBackendModules()
+    {
+        $file = $this->vendorDir . '/' . static::BACKEND_MODULE_FILE;
+        if (!is_file($file)) {
+            return [];
         }
-
-        return $extensions;
+        // invalidate opcache of extensions.php if exists
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($file, true);
+        }
+        return require($file);
     }
 
     /**
      * 保存模块
-     * @param array $extensions
+     * @param array $modules
      */
-    protected function saveModules(array $extensions)
+    protected function saveModules(array $modules)
     {
         $file = $this->vendorDir . '/' . static::MODULE_FILE;
         if (!file_exists(dirname($file))) {
             mkdir(dirname($file), 0777, true);
         }
-        $array = str_replace("'<vendor-dir>", '$vendorDir . \'', var_export($extensions, true));
-        file_put_contents($file, "<?php\n\n\$vendorDir = dirname(__DIR__);\n\nreturn $array;\n");
+        $array = var_export($modules, true);
+        file_put_contents($file, "<?php\n\nreturn $array;\n");
+        // invalidate opcache of extensions.php if exists
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($file, true);
+        }
+    }
+
+    /**
+     * 保存后端模块
+     * @param array $modules
+     */
+    protected function saveBackendModules(array $modules)
+    {
+        $file = $this->vendorDir . '/' . static::BACKEND_MODULE_FILE;
+        if (!file_exists(dirname($file))) {
+            mkdir(dirname($file), 0777, true);
+        }
+        $array = var_export($modules, true);
+        file_put_contents($file, "<?php\n\nreturn $array;\n");
         // invalidate opcache of extensions.php if exists
         if (function_exists('opcache_invalidate')) {
             opcache_invalidate($file, true);
