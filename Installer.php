@@ -203,6 +203,77 @@ class Installer extends LibraryInstaller
     }
 
     /**
+     * 加载迁移
+     * @param PackageInterface $package
+     */
+    protected function addMigration(PackageInterface $package)
+    {
+        $extra = $package->getExtra();
+        if (isset($extra[self::EXTRA_FIELD])) {
+            $extra = $extra[self::EXTRA_FIELD];
+            if (isset($extra['migrationNamespace'])) {
+                $migrations = $this->loadMigrations();
+                $migrations[] = $extra['migrationNamespace'];
+                $migrations = array_unique($migrations);
+                $this->saveMigrations($migrations);
+            }
+        }
+    }
+
+    /**
+     * 删除迁移
+     * @param PackageInterface $package
+     */
+    protected function removeMigration(PackageInterface $package)
+    {
+        $translates = $this->loadTranslates();
+        $extra = $package->getExtra();
+        if (isset($extra[self::EXTRA_FIELD]['migrationNamespace'])) {
+            foreach ($translates as $id => $translate) {
+                if ($translate == $extra[self::EXTRA_FIELD]['migrationNamespace']) {
+                    unset($translates[$id]);
+                }
+            }
+            $this->saveTranslates($translates);
+        }
+    }
+
+    /**
+     * 加载迁移
+     * @return array|mixed
+     */
+    protected function loadMigrations()
+    {
+        $file = $this->vendorDir . '/' . static::MIGRATION_FILE;
+        if (!is_file($file)) {
+            return [];
+        }
+        // invalidate opcache of extensions.php if exists
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($file, true);
+        }
+        return require($file);
+    }
+
+    /**
+     * 保存迁移
+     * @param array $migrations
+     */
+    protected function saveMigrations(array $migrations)
+    {
+        $file = $this->vendorDir . '/' . static::TRANSLATE_FILE;
+        if (!file_exists(dirname($file))) {
+            mkdir(dirname($file), 0777, true);
+        }
+        $array = var_export($migrations, true);
+        file_put_contents($file, "<?php\n\nreturn $array;\n");
+        // invalidate opcache of extensions.php if exists
+        if (function_exists('opcache_invalidate')) {
+            opcache_invalidate($file, true);
+        }
+    }
+
+    /**
      * 加载翻译
      * @param PackageInterface $package
      */
@@ -262,74 +333,7 @@ class Installer extends LibraryInstaller
             mkdir(dirname($file), 0777, true);
         }
         $array = var_export($translates, true);
-        file_put_contents($file, "<?php\n\n\$vendorDir = dirname(__DIR__);\n\nreturn $array;\n");
-        // invalidate opcache of extensions.php if exists
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($file, true);
-        }
-    }
-
-    /**
-     * 加载迁移
-     * @param PackageInterface $package
-     */
-    protected function addMigration(PackageInterface $package)
-    {
-        $extra = $package->getExtra();
-        if (isset($extra[self::EXTRA_FIELD])) {
-            $extra = $extra[self::EXTRA_FIELD];
-            if (isset($extra['migrationNamespace'])) {
-                $migrations = $this->loadMigrations();
-                $migrations[] = $extra['migrationNamespace'];
-                $this->saveMigrations($migrations);
-            }
-        }
-    }
-
-    /**
-     * 删除迁移
-     * @param PackageInterface $package
-     */
-    protected function removeMigration(PackageInterface $package)
-    {
-        $translates = $this->loadTranslates();
-        $extra = $package->getExtra();
-        if (isset($extra[self::EXTRA_FIELD])) {
-            $extra = $extra[self::EXTRA_FIELD];
-            unset($translates[$extra['name']]);
-            $this->saveTranslates($translates);
-        }
-    }
-
-    /**
-     * 加载迁移
-     * @return array|mixed
-     */
-    protected function loadMigrations()
-    {
-        $file = $this->vendorDir . '/' . static::MIGRATION_FILE;
-        if (!is_file($file)) {
-            return [];
-        }
-        // invalidate opcache of extensions.php if exists
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($file, true);
-        }
-        return require($file);
-    }
-
-    /**
-     * 保存迁移
-     * @param array $migrations
-     */
-    protected function saveMigrations(array $migrations)
-    {
-        $file = $this->vendorDir . '/' . static::TRANSLATE_FILE;
-        if (!file_exists(dirname($file))) {
-            mkdir(dirname($file), 0777, true);
-        }
-        $array = var_export($migrations, true);
-        file_put_contents($file, "<?php\n\n\$vendorDir = dirname(__DIR__);\n\nreturn $array;\n");
+        file_put_contents($file, "<?php\n\nreturn $array;\n");
         // invalidate opcache of extensions.php if exists
         if (function_exists('opcache_invalidate')) {
             opcache_invalidate($file, true);
