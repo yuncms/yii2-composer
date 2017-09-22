@@ -10,7 +10,7 @@ This is the composer installer for [YUNCMS](http://www.yuncms.net) modules.
 It implements a new composer package type named `yii2-extension`,
 which should be used by all Yii 2 extensions if they are distributed as composer packages.
 
-For license information check the [LICENSE](LICENSE.md)-file.
+For license information check the [LICENSE](LICENSE)-file.
 
 [![Latest Stable Version](https://poser.pugx.org/yuncms/yii2-composer/v/stable.png)](https://packagist.org/packages/yuncms/yii2-composer)
 [![Total Downloads](https://poser.pugx.org/yuncms/yii2-composer/downloads.png)](https://packagist.org/packages/yuncms/yii2-composer)
