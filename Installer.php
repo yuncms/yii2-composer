@@ -28,7 +28,7 @@ class Installer extends LibraryInstaller
      */
     public function supports($packageType)
     {
-        return $packageType === 'yii2-extension';
+        return $packageType === 'yuncms-module';
     }
 
     /**
