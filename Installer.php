@@ -4,6 +4,7 @@
  * @copyright Copyright (c) 2012 TintSoft Technology Co. Ltd.
  * @license http://www.tintsoft.com/license/
  */
+
 namespace yuncms\composer;
 
 use Composer\Package\PackageInterface;
@@ -20,8 +21,8 @@ use Composer\Util\Filesystem;
 class Installer extends LibraryInstaller
 {
     const EXTRA_BOOTSTRAP = 'bootstrap';
+    const EXTRA_FIELD = 'yuncms';
     const MODULE_FILE = 'yuncms/modules.php';
-
 
     /**
      * @inheritdoc
@@ -65,25 +66,40 @@ class Installer extends LibraryInstaller
 
     protected function addModule(PackageInterface $package)
     {
-        $extension = [
+        $module = [
             'name' => $package->getName(),
             'version' => $package->getVersion(),
         ];
 
         $alias = $this->generateDefaultAlias($package);
         if (!empty($alias)) {
-            $extension['alias'] = $alias;
+            $module['alias'] = $alias;
         }
         $extra = $package->getExtra();
         if (isset($extra[self::EXTRA_BOOTSTRAP])) {
-            $extension['bootstrap'] = $extra[self::EXTRA_BOOTSTRAP];
+            $module['bootstrap'] = $extra[self::EXTRA_BOOTSTRAP];
         }
-        //生成语言包配置
-        //生成 模块配置
 
-        $extensions = $this->loadModules();
-        $extensions[$package->getName()] = $extension;
-        $this->saveModules($extensions);
+        if (isset($extra[self::EXTRA_FIELD])) {
+            $m = $extra[self::EXTRA_FIELD];
+            //生成语言包配置
+            if (isset($m['backend'])) {//处理后端模块
+
+            }
+            if (isset($m['frontend'])) {//处理 前端模块
+
+            }
+            if (isset($m['i18n'])) {//处理语言包
+
+            }
+            if (isset($m['migration'])) {//处理迁移
+
+            }
+        }
+
+        $modules = $this->loadModules();
+        $modules[$package->getName()] = $module;
+        $this->saveModules($modules);
     }
 
     protected function generateDefaultAlias(PackageInterface $package)
@@ -215,7 +231,7 @@ class Installer extends LibraryInstaller
         $params = $event->getComposer()->getPackage()->getExtra();
         if (isset($params[$extraKey]) && is_array($params[$extraKey])) {
             foreach ($params[$extraKey] as $method => $args) {
-                call_user_func_array([__CLASS__, $method], (array) $args);
+                call_user_func_array([__CLASS__, $method], (array)$args);
             }
         }
     }
@@ -282,7 +298,7 @@ class Installer extends LibraryInstaller
     {
         foreach ($paths as $source => $target) {
             // handle file target as array [path, overwrite]
-            $target = (array) $target;
+            $target = (array)$target;
             echo "Copying file $source to $target[0] - ";
 
             if (!is_file($source)) {
