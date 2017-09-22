@@ -202,11 +202,8 @@ class Installer extends LibraryInstaller
         if (isset($extra[self::EXTRA_FIELD])) {
             $extra = $extra[self::EXTRA_FIELD];
             $moduleName = $extra['name'];
-            $translate = [
-                'class' => 'yii\i18n\PhpMessageSource',
-            ];
-            $translate['basePath'] = '@yuncms/' . $moduleName . '/' . $extra['i18n'];
-
+            $translate = $extra['i18n'];
+            
             $translates = $this->loadTranslates();
             $translates[$moduleName] = $translate;
             $this->saveTranslates($translates);
