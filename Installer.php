@@ -44,6 +44,7 @@ class Installer extends LibraryInstaller
         // add the package to yuncms/modules.php
         //$this->addModule($package);
         $this->addTranslate($package);
+        $this->addMigration($package);
     }
 
     /**
@@ -54,8 +55,10 @@ class Installer extends LibraryInstaller
         parent::update($repo, $initial, $target);
         //$this->removeModule($initial);
         $this->removeTranslate($initial);
+        $this->removeMigration($initial);
         //$this->addModule($target);
         $this->addTranslate($target);
+        $this->addMigration($target);
     }
 
     /**
@@ -67,8 +70,12 @@ class Installer extends LibraryInstaller
         parent::uninstall($repo, $package);
         // remove the package from yuncms/modules.php
         //$this->removeModule($package);
+
         // remove the package from yuncms/i18n.php
         $this->removeTranslate($package);
+
+        // remove the package from yuncms/migrations.php
+        $this->removeMigration($package);
     }
 
     protected function addModule(PackageInterface $package)
@@ -209,14 +216,11 @@ class Installer extends LibraryInstaller
     protected function addMigration(PackageInterface $package)
     {
         $extra = $package->getExtra();
-        if (isset($extra[self::EXTRA_FIELD])) {
-            $extra = $extra[self::EXTRA_FIELD];
-            if (isset($extra['migrationNamespace'])) {
-                $migrations = $this->loadMigrations();
-                $migrations[] = $extra['migrationNamespace'];
-                $migrations = array_unique($migrations);
-                $this->saveMigrations($migrations);
-            }
+        if (isset($extra[self::EXTRA_FIELD]['migrationNamespace'])) {
+            $migrations = $this->loadMigrations();
+            $migrations[] = $extra[self::EXTRA_FIELD]['migrationNamespace'];
+            $migrations = array_unique($migrations);
+            $this->saveMigrations($migrations);
         }
     }
 
