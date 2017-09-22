@@ -211,20 +211,18 @@ class Installer extends LibraryInstaller
             $translates[$moduleName] = $translate;
             $this->saveTranslates($translates);
         }
-
-
     }
 
     protected function removeTranslate(PackageInterface $package)
     {
         $packages = $this->loadTranslates();
         unset($packages[$package->getName()]);
-        $this->saveExtensions($packages);
+        $this->saveTranslates($packages);
     }
 
     protected function loadTranslates()
     {
-        $file = $this->vendorDir . '/' . static::MODULE_FILE;
+        $file = $this->vendorDir . '/' . static::TRANSLATE_FILE;
         if (!is_file($file)) {
             return [];
         }
