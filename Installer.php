@@ -28,7 +28,7 @@ class Installer extends LibraryInstaller
      */
     public function supports($packageType)
     {
-        return $packageType === 'yuncms-module';
+        return $packageType === 'yii2-extension';
     }
 
     /**
@@ -38,12 +38,8 @@ class Installer extends LibraryInstaller
     {
         // install the package the normal composer way
         parent::install($repo, $package);
-        // add the package to yiisoft/extensions.php
-        $this->addPackage($package);
-        // ensure the yii2-dev package also provides Yii.php in the same place as yii2 does
-        if ($package->getName() == 'yiisoft/yii2-dev') {
-            $this->linkBaseYiiFiles();
-        }
+        // add the package to yuncms/modules.php
+        $this->addModule($package);
     }
 
     /**
@@ -53,11 +49,7 @@ class Installer extends LibraryInstaller
     {
         parent::update($repo, $initial, $target);
         $this->removePackage($initial);
-        $this->addPackage($target);
-        // ensure the yii2-dev package also provides Yii.php in the same place as yii2 does
-        if ($initial->getName() == 'yiisoft/yii2-dev') {
-            $this->linkBaseYiiFiles();
-        }
+        $this->addModule($target);
     }
 
     /**
@@ -67,15 +59,11 @@ class Installer extends LibraryInstaller
     {
         // uninstall the package the normal composer way
         parent::uninstall($repo, $package);
-        // remove the package from yiisoft/extensions.php
-        $this->removePackage($package);
-        // remove links for Yii.php
-        if ($package->getName() == 'yiisoft/yii2-dev') {
-            $this->removeBaseYiiFiles();
-        }
+        // remove the package from yuncms/modules.php
+        $this->removeModule($package);
     }
 
-    protected function addPackage(PackageInterface $package)
+    protected function addModule(PackageInterface $package)
     {
         $extension = [
             'name' => $package->getName(),
@@ -90,10 +78,12 @@ class Installer extends LibraryInstaller
         if (isset($extra[self::EXTRA_BOOTSTRAP])) {
             $extension['bootstrap'] = $extra[self::EXTRA_BOOTSTRAP];
         }
+        //生成语言包配置
+        //生成 模块配置
 
-        $extensions = $this->loadExtensions();
+        $extensions = $this->loadModules();
         $extensions[$package->getName()] = $extension;
-        $this->saveExtensions($extensions);
+        $this->saveModules($extensions);
     }
 
     protected function generateDefaultAlias(PackageInterface $package)
@@ -142,14 +132,14 @@ class Installer extends LibraryInstaller
         return $aliases;
     }
 
-    protected function removePackage(PackageInterface $package)
+    protected function removeModule(PackageInterface $package)
     {
-        $packages = $this->loadExtensions();
+        $packages = $this->loadModules();
         unset($packages[$package->getName()]);
         $this->saveExtensions($packages);
     }
 
-    protected function loadExtensions()
+    protected function loadModules()
     {
         $file = $this->vendorDir . '/' . static::MODULE_FILE;
         if (!is_file($file)) {
@@ -178,7 +168,7 @@ class Installer extends LibraryInstaller
         return $extensions;
     }
 
-    protected function saveExtensions(array $extensions)
+    protected function saveModules(array $extensions)
     {
         $file = $this->vendorDir . '/' . static::MODULE_FILE;
         if (!file_exists(dirname($file))) {
@@ -189,43 +179,6 @@ class Installer extends LibraryInstaller
         // invalidate opcache of extensions.php if exists
         if (function_exists('opcache_invalidate')) {
             opcache_invalidate($file, true);
-        }
-    }
-
-    protected function linkBaseYiiFiles()
-    {
-        $yiiDir = $this->vendorDir . '/yiisoft/yii2';
-        if (!file_exists($yiiDir)) {
-            mkdir($yiiDir, 0777, true);
-        }
-        foreach (['Yii.php', 'BaseYii.php', 'classes.php'] as $file) {
-            file_put_contents($yiiDir . '/' . $file, <<<EOF
-<?php
-/**
- * This is a link provided by the yiisoft/yii2-dev package via yii2-composer plugin.
- *
- * @link http://www.yiiframework.com/
- * @copyright Copyright (c) 2008 Yii Software LLC
- * @license http://www.yiiframework.com/license/
- */
-
-return require(__DIR__ . '/../yii2-dev/framework/$file');
-
-EOF
-            );
-        }
-    }
-
-    protected function removeBaseYiiFiles()
-    {
-        $yiiDir = $this->vendorDir . '/yiisoft/yii2';
-        foreach (['Yii.php', 'BaseYii.php', 'classes.php'] as $file) {
-            if (file_exists($yiiDir . '/' . $file)) {
-                unlink($yiiDir . '/' . $file);
-            }
-        }
-        if (file_exists($yiiDir)) {
-            rmdir($yiiDir);
         }
     }
 
