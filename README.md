@@ -48,7 +48,7 @@ the Yii 2 application is responding to a request. For example,
                 "class":"yii\\i18n\\PhpMessageSource",
                 "basePath":"@yuncms/admin/message"
             },
-            "migrationNamespace": "@yuncms/admin/migrations",
+            "migrationNamespace": "yuncms\\admin\\migrations",
             "backend": {
                 "class": "yuncms\\admin\\Module"
             },
