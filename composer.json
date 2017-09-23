@@ -1,7 +1,12 @@
 {
   "name": "yuncms/yii2-composer",
   "description": "The composer plugin for yuncms module installer",
-  "keywords": ["yii2", "composer", "yuncms", "module installer"],
+  "keywords": [
+    "yii2",
+    "composer",
+    "yuncms",
+    "module installer"
+  ],
   "type": "composer-plugin",
   "license": "MIT",
   "support": {
@@ -15,13 +20,16 @@
     }
   ],
   "require": {
-    "composer-plugin-api": "^1.0"
+    "composer-plugin-api": "^1.0",
+    "yiisoft/yii2-composer": "~1.0.0"
   },
   "require-dev": {
     "composer/composer": "^1.0"
   },
   "autoload": {
-    "psr-4": { "yuncms\\composer\\": "" }
+    "psr-4": {
+      "yuncms\\composer\\": ""
+    }
   },
   "extra": {
     "class": "yuncms\\composer\\Plugin",
