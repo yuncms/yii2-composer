@@ -182,6 +182,7 @@ class Installer extends LibraryInstaller
             return [];
         }
         $this->opcacheInvalidate($file);
+
         $extensions = require($file);
 
         $vendorDir = str_replace('\\', '/', $this->vendorDir);
@@ -547,7 +548,8 @@ EOF
         $extra = $package->getExtra();
         if (isset($extra[self::EXTRA_FIELD]['name']) && isset($extra[self::EXTRA_FIELD]['i18n'])) {
             $translates = $this->loadTranslates();
-            $translates[$extra[self::EXTRA_FIELD]['name']] = $extra[self::EXTRA_FIELD]['i18n'];
+            $translateName = $extra[self::EXTRA_FIELD]['name'] . '*';
+            $translates[$translateName] = $extra[self::EXTRA_FIELD]['i18n'];
             $this->saveTranslates($translates);
         }
     }
@@ -561,7 +563,8 @@ EOF
         $extra = $package->getExtra();
         if (isset($extra[self::EXTRA_FIELD]['name'])) {
             $translates = $this->loadTranslates();
-            unset($translates[$extra[self::EXTRA_FIELD]['name']]);
+            $translateName = $extra[self::EXTRA_FIELD]['name'] . '*';
+            unset($translates[$translateName]);
             $this->saveTranslates($translates);
         }
     }
