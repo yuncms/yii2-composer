@@ -88,7 +88,7 @@ class Installer extends LibraryInstaller
         $extra = $package->getExtra();
         if (isset($extra[self::EXTRA_FIELD]['name'])) {
             //处理前端模块
-            if ($extra[self::EXTRA_FIELD]['frontend']['class']) {
+            if (isset($extra[self::EXTRA_FIELD]['frontend']['class'])) {
                 $modules = $this->loadModules();
                 $modules[$extra[self::EXTRA_FIELD]['name']] = $extra[self::EXTRA_FIELD]['frontend'];
                 $this->saveModules($modules);
