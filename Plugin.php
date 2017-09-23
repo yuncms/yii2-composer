@@ -19,11 +19,6 @@ use Composer\IO\IOInterface;
 class Plugin implements \yii\composer\Plugin
 {
     /**
-     * @var array noted package updates.
-     */
-    private $_packageUpdates = [];
-
-    /**
      * @var string path to the vendor directory.
      */
     private $_vendorDir;
