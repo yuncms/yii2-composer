@@ -86,19 +86,24 @@ class Installer extends LibraryInstaller
     protected function addModule(PackageInterface $package)
     {
         $extra = $package->getExtra();
-        if (isset($extra[self::EXTRA_FIELD]['name']) && isset($extra[self::EXTRA_FIELD]['frontend'])) {
-            $module = $extra[self::EXTRA_FIELD]['frontend'];
-            if (isset($module['class'])) {
-                $modules = $this->loadModules();
-                $modules[$extra[self::EXTRA_FIELD]['name']] = $module;
-                $this->saveModules($modules);
+        if (isset($extra[self::EXTRA_FIELD]['name'])) {
+            //处理前端模块
+            if (isset($extra[self::EXTRA_FIELD]['frontend'])) {
+                $module = $extra[self::EXTRA_FIELD]['frontend'];
+                if (isset($module['class'])) {
+                    $modules = $this->loadModules();
+                    $modules[$extra[self::EXTRA_FIELD]['name']] = $module;
+                    $this->saveModules($modules);
+                }
             }
-
-            $backendModule = $extra[self::EXTRA_FIELD]['backend'];
-            if (isset($backendModule['class'])) {
-                $backendModules = $this->loadBackendModules();
-                $backendModules[$extra[self::EXTRA_FIELD]['name']] = $backendModule;
-                $this->saveBackendModules($backendModules);
+            //处理后端模块
+            if (isset($extra[self::EXTRA_FIELD]['backend'])) {
+                $backendModule = $extra[self::EXTRA_FIELD]['backend'];
+                if (isset($backendModule['class'])) {
+                    $backendModules = $this->loadBackendModules();
+                    $backendModules[$extra[self::EXTRA_FIELD]['name']] = $backendModule;
+                    $this->saveBackendModules($backendModules);
+                }
             }
         }
     }
@@ -114,9 +119,10 @@ class Installer extends LibraryInstaller
             $modules = $this->loadModules();
             unset($modules[$extra[self::EXTRA_FIELD]['name']]);
             $this->saveModules($modules);
+
             $backendModules = $this->loadBackendModules();
             unset($backendModules[$extra[self::EXTRA_FIELD]['name']]);
-            $this->saveModules($backendModules);
+            $this->saveBackendModules($backendModules);
         }
     }
 
