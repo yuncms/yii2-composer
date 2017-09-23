@@ -42,6 +42,8 @@ class Plugin implements PluginInterface, EventSubscriberInterface
     {
         $installer = new Installer($io, $composer);
         $composer->getInstallationManager()->addInstaller($installer);
+        $composer->getInstallationManager()->getInstaller('yii2-extension');
+
         $this->_vendorDir = rtrim($composer->getConfig()->get('vendor-dir'), '/');
         $this->mkFile($this->_vendorDir . '/yiisoft/extensions.php');
         $this->mkFile($this->_vendorDir . '/' . Installer::BACKEND_MODULE_FILE);

@@ -7,6 +7,9 @@
 
 namespace yuncms\composer;
 
+use Composer\Script\Event;
+use Composer\Util\Filesystem;
+use Composer\Script\CommandEvent;
 use Composer\Package\PackageInterface;
 use Composer\Installer\LibraryInstaller;
 use Composer\Repository\InstalledRepositoryInterface;
