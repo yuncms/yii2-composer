@@ -88,22 +88,16 @@ class Installer extends LibraryInstaller
         $extra = $package->getExtra();
         if (isset($extra[self::EXTRA_FIELD]['name'])) {
             //处理前端模块
-            if (isset($extra[self::EXTRA_FIELD]['frontend'])) {
-                $module = $extra[self::EXTRA_FIELD]['frontend'];
-                if (isset($module['class'])) {
-                    $modules = $this->loadModules();
-                    $modules[$extra[self::EXTRA_FIELD]['name']] = $module;
-                    $this->saveModules($modules);
-                }
+            if ($extra[self::EXTRA_FIELD]['frontend']['class']) {
+                $modules = $this->loadModules();
+                $modules[$extra[self::EXTRA_FIELD]['name']] = $extra[self::EXTRA_FIELD]['frontend'];
+                $this->saveModules($modules);
             }
             //处理后端模块
-            if (isset($extra[self::EXTRA_FIELD]['backend'])) {
-                $backendModule = $extra[self::EXTRA_FIELD]['backend'];
-                if (isset($backendModule['class'])) {
-                    $backendModules = $this->loadBackendModules();
-                    $backendModules[$extra[self::EXTRA_FIELD]['name']] = $backendModule;
-                    $this->saveBackendModules($backendModules);
-                }
+            if (isset($extra[self::EXTRA_FIELD]['backend']['class'])) {
+                $backendModules = $this->loadBackendModules();
+                $backendModules[$extra[self::EXTRA_FIELD]['name']] = $extra[self::EXTRA_FIELD]['backend'];
+                $this->saveBackendModules($backendModules);
             }
         }
     }
@@ -136,10 +130,7 @@ class Installer extends LibraryInstaller
         if (!is_file($file)) {
             return [];
         }
-        // invalidate opcache of extensions.php if exists
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($file, true);
-        }
+        $this->opcacheInvalidate($file);
         return require($file);
     }
 
@@ -153,10 +144,7 @@ class Installer extends LibraryInstaller
         if (!is_file($file)) {
             return [];
         }
-        // invalidate opcache of extensions.php if exists
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($file, true);
-        }
+        $this->opcacheInvalidate($file);
         return require($file);
     }
 
@@ -172,10 +160,7 @@ class Installer extends LibraryInstaller
         }
         $array = var_export($modules, true);
         file_put_contents($file, "<?php\n\nreturn $array;\n");
-        // invalidate opcache of extensions.php if exists
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($file, true);
-        }
+        $this->opcacheInvalidate($file);
     }
 
     /**
@@ -190,10 +175,7 @@ class Installer extends LibraryInstaller
         }
         $array = var_export($modules, true);
         file_put_contents($file, "<?php\n\nreturn $array;\n");
-        // invalidate opcache of extensions.php if exists
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($file, true);
-        }
+        $this->opcacheInvalidate($file);
     }
 
     /**
@@ -239,10 +221,7 @@ class Installer extends LibraryInstaller
         if (!is_file($file)) {
             return [];
         }
-        // invalidate opcache of extensions.php if exists
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($file, true);
-        }
+        $this->opcacheInvalidate($file);
         return require($file);
     }
 
@@ -258,10 +237,7 @@ class Installer extends LibraryInstaller
         }
         $array = var_export($migrations, true);
         file_put_contents($file, "<?php\n\nreturn $array;\n");
-        // invalidate opcache of extensions.php if exists
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($file, true);
-        }
+        $this->opcacheInvalidate($file);
     }
 
     /**
@@ -302,10 +278,7 @@ class Installer extends LibraryInstaller
         if (!is_file($file)) {
             return [];
         }
-        // invalidate opcache of extensions.php if exists
-        if (function_exists('opcache_invalidate')) {
-            opcache_invalidate($file, true);
-        }
+        $this->opcacheInvalidate($file);
         return require($file);
     }
 
@@ -321,6 +294,15 @@ class Installer extends LibraryInstaller
         }
         $array = var_export($translates, true);
         file_put_contents($file, "<?php\n\nreturn $array;\n");
+        $this->opcacheInvalidate($file);
+    }
+
+    /**
+     * @param $file
+     * @return void
+     */
+    protected function opcacheInvalidate($file)
+    {
         // invalidate opcache of extensions.php if exists
         if (function_exists('opcache_invalidate')) {
             opcache_invalidate($file, true);
