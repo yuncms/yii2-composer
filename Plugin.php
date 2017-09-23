@@ -15,7 +15,7 @@ use Composer\Plugin\PluginInterface;
  * Plugin is the composer plugin that registers the Yii composer installer.
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * @author Tongle XU <xutongle@gmail.com>
  */
 class Plugin implements PluginInterface
 {

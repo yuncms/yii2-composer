@@ -10,13 +10,10 @@ namespace yuncms\composer;
 use Composer\Package\PackageInterface;
 use Composer\Installer\LibraryInstaller;
 use Composer\Repository\InstalledRepositoryInterface;
-use Composer\Script\CommandEvent;
-use Composer\Script\Event;
-use Composer\Util\Filesystem;
 
 /**
  * @author Qiang Xue <qiang.xue@gmail.com>
- * @since 2.0
+ * @author Tongle Xu <xutongle@gmail.com>
  */
 class Installer extends LibraryInstaller
 {
@@ -260,9 +257,9 @@ class Installer extends LibraryInstaller
      */
     protected function removeTranslate(PackageInterface $package)
     {
-        $translates = $this->loadTranslates();
         $extra = $package->getExtra();
         if (isset($extra[self::EXTRA_FIELD]['name'])) {
+            $translates = $this->loadTranslates();
             unset($translates[$extra[self::EXTRA_FIELD]['name']]);
             $this->saveTranslates($translates);
         }
