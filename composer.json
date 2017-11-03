@@ -1,5 +1,5 @@
 {
-  "name": "yuncms/yuncms-composer",
+  "name": "yuncms/yii2-composer",
   "description": "The composer plugin for yuncms module installer",
   "keywords": [
     "yii2",
