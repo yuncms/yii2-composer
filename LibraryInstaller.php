@@ -7,13 +7,14 @@
 
 namespace yuncms\composer;
 
+use yii\composer\Installer;
 use Composer\Package\PackageInterface;
 use Composer\Repository\InstalledRepositoryInterface;
 
 /**
  * @author Tongle Xu <xutongle@gmail.com>
  */
-class Installer extends \yii\composer\Installer
+class LibraryInstaller extends Installer
 {
     const EXTRA_FIELD = 'yuncms';
     const TRANSLATE_FILE = 'yuncms/i18n.php';

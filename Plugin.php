@@ -25,8 +25,8 @@ class Plugin extends \yii\composer\Plugin implements PluginInterface, EventSubsc
     public function activate(Composer $composer, IOInterface $io)
     {
         parent::activate($composer, $io);
-        $installer = new Installer($io, $composer);
-        $composer->getInstallationManager()->addInstaller($installer);
+        $libraryInstaller = new LibraryInstaller($io, $composer);
+        $composer->getInstallationManager()->addInstaller($libraryInstaller);
         $composer->getInstallationManager()->getInstaller('yii2-extension');//覆盖掉Yii2的
 
         $vendorDir = rtrim($composer->getConfig()->get('vendor-dir'), '/');
