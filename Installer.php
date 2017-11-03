@@ -22,7 +22,7 @@ class Installer extends \yii\composer\Installer
     const FRONTEND_MODULE_FILE = 'yuncms/frontend.php';
     const BACKEND_MODULE_FILE = 'yuncms/backend.php';
     const EVENT_FILE = 'yuncms/events.php';
-    const CRON_FILE = 'yuncms/events.php';
+    const CRON_FILE = 'yuncms/cron.php';
 
     /**
      * @inheritdoc
@@ -96,7 +96,19 @@ class Installer extends \yii\composer\Installer
                 $this->saveConfig($translates, self::TRANSLATE_FILE);
             }
             //处理事件
+            if (isset($extra[self::EXTRA_FIELD]['name']) && isset($extra[self::EXTRA_FIELD]['events'])) {
+                $events = $this->loadConfig(self::EVENT_FILE);
+                $translateName = $extra[self::EXTRA_FIELD]['name'];
+                $events[$translateName] = $extra[self::EXTRA_FIELD]['events'];
+                $this->saveConfig($events, self::EVENT_FILE);
+            }
             //处理定时任务
+            if (isset($extra[self::EXTRA_FIELD]['name']) && isset($extra[self::EXTRA_FIELD]['cron'])) {
+                $crons = $this->loadConfig(self::CRON_FILE);
+                $translateName = $extra[self::EXTRA_FIELD]['name'];
+                $crons[$translateName] = $extra[self::EXTRA_FIELD]['cron'];
+                $this->saveConfig($crons, self::CRON_FILE);
+            }
         }
     }
 
