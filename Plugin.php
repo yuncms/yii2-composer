@@ -32,12 +32,12 @@ class Plugin extends \yii\composer\Plugin implements PluginInterface, EventSubsc
         $vendorDir = rtrim($composer->getConfig()->get('vendor-dir'), '/');
 
         $files = [
-            $vendorDir . '/' . Installer::BACKEND_MODULE_FILE,
-            $vendorDir . '/' . Installer::FRONTEND_MODULE_FILE,
-            $vendorDir . '/' . Installer::MIGRATION_FILE,
-            $vendorDir . '/' . Installer::TRANSLATE_FILE,
-            $vendorDir . '/' . Installer::EVENT_FILE,
-            $vendorDir . '/' . Installer::CRON_FILE
+            $vendorDir . '/' . LibraryInstaller::BACKEND_MODULE_FILE,
+            $vendorDir . '/' . LibraryInstaller::FRONTEND_MODULE_FILE,
+            $vendorDir . '/' . LibraryInstaller::MIGRATION_FILE,
+            $vendorDir . '/' . LibraryInstaller::TRANSLATE_FILE,
+            $vendorDir . '/' . LibraryInstaller::EVENT_FILE,
+            $vendorDir . '/' . LibraryInstaller::CRON_FILE
         ];
         $this->mkFile($files);
     }
