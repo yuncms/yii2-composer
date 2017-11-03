@@ -7,20 +7,14 @@
 
 namespace yuncms\composer;
 
-use Composer\Script;
 use Composer\Composer;
 use Composer\IO\IOInterface;
-use Composer\Script\ScriptEvents;
 use Composer\Plugin\PluginInterface;
-use Composer\Installer\PackageEvent;
-use Composer\Installer\PackageEvents;
 use Composer\EventDispatcher\EventSubscriberInterface;
-use Composer\DependencyResolver\Operation\UpdateOperation;
 
 /**
  * Plugin is the composer plugin that registers the Yii composer installer.
  *
- * @author Qiang Xue <qiang.xue@gmail.com>
  * @author Tongle XU <xutongle@gmail.com>
  */
 class Plugin extends \yii\composer\Plugin implements PluginInterface, EventSubscriberInterface
@@ -41,7 +35,9 @@ class Plugin extends \yii\composer\Plugin implements PluginInterface, EventSubsc
             $vendorDir . '/' . Installer::BACKEND_MODULE_FILE,
             $vendorDir . '/' . Installer::FRONTEND_MODULE_FILE,
             $vendorDir . '/' . Installer::MIGRATION_FILE,
-            $vendorDir . '/' . Installer::TRANSLATE_FILE
+            $vendorDir . '/' . Installer::TRANSLATE_FILE,
+            $vendorDir . '/' . Installer::EVENT_FILE,
+            $vendorDir . '/' . Installer::CRON_FILE
         ];
         $this->mkFile($files);
     }
@@ -51,7 +47,7 @@ class Plugin extends \yii\composer\Plugin implements PluginInterface, EventSubsc
      * @param array $files
      * @return void
      */
-    public function mkFile($files): void
+    public function mkFile($files)
     {
         foreach ($files as $file) {
             if (!is_file($file)) {

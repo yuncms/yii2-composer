@@ -7,15 +7,10 @@
 
 namespace yuncms\composer;
 
-use Composer\Script\Event;
-use Composer\Util\Filesystem;
-use Composer\Script\CommandEvent;
 use Composer\Package\PackageInterface;
-use Composer\Installer\LibraryInstaller;
 use Composer\Repository\InstalledRepositoryInterface;
 
 /**
- * @author Qiang Xue <qiang.xue@gmail.com>
  * @author Tongle Xu <xutongle@gmail.com>
  */
 class Installer extends \yii\composer\Installer
@@ -26,6 +21,8 @@ class Installer extends \yii\composer\Installer
 
     const FRONTEND_MODULE_FILE = 'yuncms/frontend.php';
     const BACKEND_MODULE_FILE = 'yuncms/backend.php';
+    const EVENT_FILE = 'yuncms/events.php';
+    const CRON_FILE = 'yuncms/events.php';
 
     /**
      * @inheritdoc
@@ -66,7 +63,7 @@ class Installer extends \yii\composer\Installer
     }
 
     /**
-     * 安装模块
+     * 安装扩展
      * @param PackageInterface $package
      */
     protected function addExtension(PackageInterface $package)
@@ -104,7 +101,7 @@ class Installer extends \yii\composer\Installer
     }
 
     /**
-     * 删除模块
+     * 删除扩展
      * @param PackageInterface $package
      */
     protected function removeExtension(PackageInterface $package)
@@ -131,32 +128,12 @@ class Installer extends \yii\composer\Installer
         }
     }
 
-
-    /**
-     * 删除迁移
-     * @param PackageInterface $package
-     */
-    protected function removeMigration(PackageInterface $package)
-    {
-        $translates = $this->loadConfig(self::MIGRATION_FILE);
-        $extra = $package->getExtra();
-        if (isset($extra[self::EXTRA_FIELD]['migrationNamespace'])) {
-            foreach ($translates as $id => $translate) {
-                if ($translate == $extra[self::EXTRA_FIELD]['migrationNamespace']) {
-                    unset($translates[$id]);
-                }
-            }
-            $this->saveConfig($translates, self::MIGRATION_FILE);
-        }
-    }
-
-
     /**
      * 加载配置
      * @param string $file
      * @return array|mixed
      */
-    protected function loadConfig($file): array
+    protected function loadConfig($file)
     {
         $file = $this->vendorDir . '/' . $file;
         if (!is_file($file)) {
@@ -171,7 +148,7 @@ class Installer extends \yii\composer\Installer
      * @param array $config
      * @param string $file
      */
-    protected function saveConfig(array $config, $file): void
+    protected function saveConfig(array $config, $file)
     {
         $file = $this->vendorDir . '/' . $file;
         if (!file_exists(dirname($file))) {
