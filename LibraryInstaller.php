@@ -86,7 +86,8 @@ class LibraryInstaller extends Installer
             //处理迁移
             if (isset($extra[self::EXTRA_FIELD]['migrationNamespace'])) {
                 $migrations = $this->loadConfig(self::MIGRATION_FILE);
-                $migrations[$extra[self::EXTRA_FIELD]['name']] = $extra[self::EXTRA_FIELD]['migrationNamespace'];
+                $migrations[] = $extra[self::EXTRA_FIELD]['migrationNamespace'];
+                $migrations = array_unique($migrations);
                 $this->saveConfig($migrations, self::MIGRATION_FILE);
             }
             //处理语言包
@@ -130,8 +131,14 @@ class LibraryInstaller extends Installer
             $this->saveConfig($backendModules, self::BACKEND_MODULE_FILE);
 
             $migrations = $this->loadConfig(self::MIGRATION_FILE);
-            unset($migrations[$extra[self::EXTRA_FIELD]['name']]);
-            $this->saveConfig($migrations, self::MIGRATION_FILE);
+            if (isset($extra[self::EXTRA_FIELD]['migrationNamespace'])) {
+                foreach ($migrations as $id => $migration) {
+                    if ($migration == $extra[self::EXTRA_FIELD]['migrationNamespace']) {
+                        unset($migrations[$id]);
+                    }
+                }
+                $this->saveConfig($migrations, self::MIGRATION_FILE);
+            }
 
             $translates = $this->loadConfig(self::TRANSLATE_FILE);
             $translateName = $extra[self::EXTRA_FIELD]['name'] . '*';
