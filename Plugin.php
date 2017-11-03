@@ -36,21 +36,28 @@ class Plugin extends \yii\composer\Plugin implements PluginInterface, EventSubsc
         $composer->getInstallationManager()->getInstaller('yii2-extension');//覆盖掉Yii2的
 
         $vendorDir = rtrim($composer->getConfig()->get('vendor-dir'), '/');
-        $this->mkFile($vendorDir . '/' . Installer::BACKEND_MODULE_FILE);
-        $this->mkFile($vendorDir . '/' . Installer::MODULE_FILE);
-        $this->mkFile($vendorDir . '/' . Installer::MIGRATION_FILE);
-        $this->mkFile($vendorDir . '/' . Installer::TRANSLATE_FILE);
+
+        $files = [
+            $vendorDir . '/' . Installer::BACKEND_MODULE_FILE,
+            $vendorDir . '/' . Installer::FRONTEND_MODULE_FILE,
+            $vendorDir . '/' . Installer::MIGRATION_FILE,
+            $vendorDir . '/' . Installer::TRANSLATE_FILE
+        ];
+        $this->mkFile($files);
     }
 
     /**
      * 创建文件
-     * @param string $file
+     * @param array $files
+     * @return void
      */
-    public function mkFile($file)
+    public function mkFile($files): void
     {
-        if (!is_file($file)) {
-            @mkdir(dirname($file), 0777, true);
-            file_put_contents($file, "<?php\n\nreturn [];\n");
+        foreach ($files as $file) {
+            if (!is_file($file)) {
+                @mkdir(dirname($file), 0777, true);
+                file_put_contents($file, "<?php\n\nreturn [];\n");
+            }
         }
     }
 

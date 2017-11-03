@@ -150,7 +150,7 @@ class Installer extends \yii\composer\Installer
         }
     }
 
-    
+
     /**
      * 加载配置
      * @param string $file
